@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+venv/
+env/
+.venv/
+.Python
+
+# VS Code
+.vscode/
+
+# Environment & secrets
+.env
+credentials.json
+
+# Data & outputs
+synthetic_user_ratings.csv
+netflix_titles.csv
+
+# Mac/Windows
+.DS_Store
+Thumbs.db
