@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netflix AI Recommender</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --netflix-red: #E50914;
+            --netflix-dark: #141414;
+            --netflix-gray: #282828;
+            --text-white: #ffffff;
+        }
+
+        body {
+            background-color: var(--netflix-dark);
+            color: var(--text-white);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background-color: rgba(0, 0, 0, 0.95);
+            padding: 1rem 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .navbar-brand {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.5rem;
+            color: var(--netflix-red);
+            letter-spacing: 2px;
+        }
+
+        .hero-section {
+            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)), url('https://assets.nflxext.com/ffe/siteui/vlv3/ab4b0b22-2ddf-4d48-ae88-c201ae0267e2/0efe6360-7c16-459a-98c4-87ce25b1a27d/US-en-20231030-popsignuptwoweeks-perspective_alpha_website_large.jpg');
+            background-size: cover;
+            background-position: center;
+            padding: 100px 0;
+            text-align: center;
+            border-bottom: 4px solid var(--netflix-gray);
+        }
+
+        .hero-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: #ccc;
+            margin-bottom: 3rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .feature-card {
+            background-color: var(--netflix-gray);
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+            height: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border: 1px solid #444;
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            color: var(--netflix-red);
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .form-control, .form-select {
+            background-color: #333;
+            border: 1px solid #444;
+            color: white;
+            padding: 12px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: #444;
+            color: white;
+            border-color: var(--netflix-red);
+            box-shadow: none;
+        }
+
+        .btn-primary {
+            background-color: var(--netflix-red);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary:hover {
+            background-color: #b20710;
+        }
+
+        .section-header {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            border-left: 5px solid var(--netflix-red);
+            padding-left: 15px;
+        }
+
+        .step-badge {
+            background-color: var(--netflix-red);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+         /* Analytics Section styles */
+        .analytics-container {
+             margin-top: 50px;
+             padding-top: 50px;
+             border-top: 1px solid #333;
+        }
+
+        footer {
+            margin-top: 80px;
+            padding: 30px 0;
+            border-top: 1px solid #333;
+            text-align: center;
+            color: #666;
+            background-color: #000;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">NETFLIX AI LAB</a>
+            <div class="ms-auto text-white">
+                <span class="badge bg-secondary p-2">Data Science Project</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section: The Main AI Feature -->
+    <section class="hero-section">
+        <div class="container">
+            <h1 class="hero-title">Discover Your Next Obsession</h1>
+            <p class="hero-subtitle">
+                Powered by <strong>Machine Learning (TF-IDF & SVD)</strong>. <br> 
+                Our intelligent system analyzes plot descriptions, cast, and genres to find the perfect match for you.
+            </p>
+
+            <!-- Main Recommendation Form -->
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6">
+                    <div class="feature-card" style="background-color: rgba(0,0,0,0.8); border: 1px solid #444;">
+                        <form action="/recommend_similar" method="post">
+                            <label class="form-label text-start"><i class="fas fa-search me-2"></i> What did you like watching recently?</label>
+                            <div class="input-group mb-3">
+                                <select class="form-select" name="title" required>
+                                    <option value="" selected disabled>Select a movie or TV show...</option>
+                                    {% for title in titles %}
+                                    <option value="{{ title }}">{{ title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                Match Similar Content <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Secondary Features: Exploration -->
+    <section class="container py-5">
+        <h2 class="section-header">Explore Categories</h2>
+        <div class="row">
+            <!-- Genre Column -->
+            <div class="col-md-6">
+                <div class="feature-card">
+                    <div class="card-icon"><i class="fas fa-theater-masks"></i></div>
+                    <h4>Browse by Genre</h4>
+                    <p class="text-muted small">Find top-rated content in specific categories.</p>
+                    <form action="/recommend_genre" method="post">
+                        <select class="form-select mb-3" name="genre" required>
+                            <option value="" selected disabled>Choose Genre...</option>
+                            {% for genre in genres %}
+                            <option value="{{ genre }}">{{ genre }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-outline-light w-100">Filter By Genre</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Actor Column -->
+            <div class="col-md-6">
+                <div class="feature-card">
+                    <div class="card-icon"><i class="fas fa-user-astronaut"></i></div>
+                    <h4>Search by Actor</h4>
+                    <p class="text-muted small">Find all movies featuring your favorite star.</p>
+                    <form action="/recommend_actor" method="post">
+                        <input type="text" class="form-control mb-3" name="actor" placeholder="e.g. Brad Pitt" required>
+                        <button type="submit" class="btn btn-outline-light w-100">Find Movies</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Advanced Features: Hidden by default (Accordion) or Separate Section -->
+    <section class="container py-4">
+        <div class="accordion" id="advancedAccordion">
+            <div class="accordion-item bg-dark border-secondary">
+                <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                        <i class="fas fa-robot me-2"></i> Advanced AI Models (Collaborative & Hybrid)
+                    </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#advancedAccordion">
+                    <div class="accordion-body text-white">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <h5>Collaborative Filtering (Simulated Users)</h5>
+                                <form action="/recommend_collaborative" method="post" class="mt-3">
+                                    <input type="number" class="form-control mb-2" name="user_id" placeholder="User ID (1-1000)" min="1" max="1000" required>
+                                    <select class="form-select mb-2" name="cf_type">
+                                        <option value="user_based">User-Based (Find Similar Users)</option>
+                                        <option value="item_based">Item-Based (Find Similar Items)</option>
+                                        <option value="matrix_factorization">Matrix Factorization (SVD)</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-primary btn-sm">Run Simulation</button>
+                                </form>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Hybrid Recommendation (Content + User)</h5>
+                                <form action="/recommend_hybrid" method="post" class="mt-3">
+                                    <input type="number" class="form-control mb-2" name="user_id" placeholder="User ID (Optional)" min="1" max="1000">
+                                    <select class="form-select mb-2" name="title">
+                                        <option value="">No specific show</option>
+                                        {% for title in titles %}
+                                        <option value="{{ title }}">{{ title }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" class="btn btn-primary btn-sm">Run Hybrid Model</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analytics Section (Simplified) -->
+    <section class="container analytics-container">
+        <h2 class="section-header">Dataset Analytics</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="feature-card text-center">
+                    <h5>Content Distribution</h5>
+                    <canvas id="contentTypeChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-4">
+                 <div class="feature-card text-center">
+                    <h5>Top Genres</h5>
+                    <canvas id="genreChart"></canvas>
+                </div>
+            </div>
+             <div class="col-md-4">
+                 <div class="feature-card text-center">
+                    <h5>Added Over Time</h5>
+                    <canvas id="yearChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-3">
+            <a href="/analytics" class="btn btn-outline-secondary">View Full Dashboard</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>Developed for CSC-487 Data Science Semester Project</p>
+            <p class="small text-muted">Using Python, Flask, Pandas, Scikit-Learn</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fetch Analytics Data
+            fetch('/api/analytics')
+                .then(response => response.json())
+                .then(data => {
+                    if(data.contentTypes) createPieChart('contentTypeChart', data.contentTypes);
+                    if(data.genres) createPolarChart('genreChart', data.genres);
+                    if(data.years) createLineChart('yearChart', data.years);
+                });
+        });
+
+        function createPieChart(id, data) {
+            new Chart(document.getElementById(id), {
+                type: 'doughnut',
+                data: {
+                    labels: data.labels,
+                    datasets: [{ data: data.values, backgroundColor: ['#E50914', '#555'] }]
+                },
+                options: { plugins: { legend: { display: true, position: 'bottom', labels: {color:'white'} } } }
+            });
+        }
+
+        function createPolarChart(id, data) {
+             new Chart(document.getElementById(id), {
+                type: 'polarArea',
+                data: {
+                    labels: data.labels.slice(0,5),
+                    datasets: [{ data: data.values.slice(0,5), backgroundColor: ['#E50914', '#B20710', '#900', '#700', '#500'] }]
+                },
+                options: { plugins: { legend: { display: false } }, scales: { r: { grid: { color: '#444' } } } }
+            });
+        }
+
+        function createLineChart(id, data) {
+             new Chart(document.getElementById(id), {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{ label: 'Added', data: data.values, borderColor: '#E50914', tension: 0.4 }]
+                },
+                options: { plugins: { legend: { display: false } }, scales: { x: { ticks: {color:'white'} }, y: { ticks: {color:'white'}, grid: {color:'#333'} } } }
+            });
+        }
+    </script>
+</body>
+</html>

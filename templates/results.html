@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results | Netflix AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --netflix-red: #E50914;
+            --netflix-dark: #141414;
+            --netflix-gray: #282828;
+            --text-white: #ffffff;
+        }
+
+        body {
+            background-color: var(--netflix-dark);
+            color: var(--text-white);
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .navbar {
+            background-color: rgba(0, 0, 0, 0.95);
+            padding: 1rem 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .navbar-brand {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.5rem;
+            color: var(--netflix-red);
+            letter-spacing: 2px;
+        }
+
+        .results-header {
+            background-color: #000;
+            padding: 60px 0;
+            border-bottom: 1px solid #333;
+            text-align: center;
+        }
+
+        .results-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .query-highlight {
+            color: var(--netflix-red);
+        }
+
+        .movie-card {
+            background-color: var(--netflix-gray);
+            border-radius: 8px;
+            overflow: hidden;
+            height: 100%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-title {
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .badge-netflix {
+            background-color: var(--netflix-red);
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+
+        .badge-year {
+            background-color: #555;
+            font-size: 0.8rem;
+        }
+
+        .movie-desc {
+            font-size: 0.9rem;
+            color: #ccc;
+            margin-top: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .btn-back {
+            background-color: transparent;
+            border: 2px solid var(--netflix-red);
+            color: white;
+            padding: 10px 30px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-back:hover {
+            background-color: var(--netflix-red);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">NETFLIX AI LAB</a>
+        </div>
+    </nav>
+
+    <div class="results-header">
+        <div class="container">
+            <h1 class="results-title">
+                {% if recommendation_type == 'similar' %}
+                Because you liked <span class="query-highlight">{{ query }}</span>
+                {% elif recommendation_type == 'genre' %}
+                Top <span class="query-highlight">{{ query }}</span> Titles
+                {% elif recommendation_type == 'actor' %}
+                Featuring <span class="query-highlight">{{ query }}</span>
+                {% else %}
+                AI Recommendations for <span class="query-highlight">{{ query }}</span>
+                {% endif %}
+            </h1>
+            <p class="text-muted">Here are our top picks for you</p>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        {% if not recommendations %}
+        <div class="text-center py-5">
+            <i class="fas fa-ghost fa-4x text-muted mb-3"></i>
+            <h3>No matches found</h3>
+            <p>Try searching for a different title or genre.</p>
+            <a href="/" class="btn btn-back mt-3">Back to Home</a>
+        </div>
+        {% else %}
+        <div class="row">
+            {% for rec in recommendations %}
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="movie-card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ rec.title }}</h5>
+                        <div class="mb-2">
+                            <span class="badge badge-netflix">{{ rec.type }}</span>
+                            <span class="badge badge-year">{{ rec.release_year }}</span>
+                            {% if rec.hybrid_score %}
+                            <span class="badge bg-info text-dark">{{ (rec.hybrid_score * 100)|round|int }}% Match</span>
+                            {% endif %}
+                        </div>
+                        <p class="small text-muted mb-2">
+                            <strong>Genre:</strong> {{ rec.listed_in }}
+                        </p>
+                        <p class="movie-desc">{{ rec.description }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center mt-5">
+            <a href="/" class="btn btn-back">
+                <i class="fas fa-arrow-left me-2"></i> Search Again
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+</body>
+
+</html>
